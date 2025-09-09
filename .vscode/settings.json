@@ -8,6 +8,8 @@
     "mbstring",
     "mysqld",
     "phar",
-    "phpmyadmin"
+    "phpmyadmin",
+    "TINYINT",
+    "VARCHAR"
   ]
 }
