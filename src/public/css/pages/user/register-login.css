@@ -1,0 +1,24 @@
+body {
+background-color: white;
+}
+
+main{
+  margin: 3rem auto;
+  width: calc(100% - 2rem);
+  max-width: 800px;
+}
+
+.content-title {
+  font-size: 2.25rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.submit{
+  margin-top: 5rem;
+}
+
+.login-link,.register-link {
+  text-align: center;
+  margin-top: 2rem;
+}

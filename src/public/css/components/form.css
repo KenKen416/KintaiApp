@@ -1,0 +1,31 @@
+.form-inner {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-top: 1rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.form-input {
+  width: 100%;
+  max-width: 680px;
+  height: 45px;
+  padding: 0.5rem;
+  font-size: 1.25rem;
+  border: 1px solid black;
+  border-radius: 4px;
+}
+
+.error-message {
+  color: red;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
