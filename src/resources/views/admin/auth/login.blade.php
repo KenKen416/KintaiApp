@@ -12,7 +12,7 @@
 <div class="content-form">
   <form class="form-inner" action="" method="POST">
     @csrf
-
+    <input type="hidden" name="context" value="admin">
     <div class="form-group">
       <label class="form-label" for="email">メールアドレス</label>
       <input type="email" id="email" name="email" class="form-input" value="{{ old('email') }}" required>

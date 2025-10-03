@@ -10,7 +10,7 @@
 </div>
 
 <div class="content-form">
-  <form class="form-inner" action="" method="POST">
+  <form class="form-inner" action="{{ route('register') }}" method="POST">
     @csrf
     <div class="form-group">
       <label class="form-label" for="name">名前</label>
@@ -21,7 +21,7 @@
     </div>
     <div class="form-group">
       <label class="form-label" for="email">メールアドレス</label>
-      <input type="email" id="email" name="email" class="form-input" value="{{ old('email') }}" required>
+      <input type="email" id="email" name="email" class="form-input" value="{{ old('email') }}" >
       @error('email')
         <div class="error-message">{{ $message }}</div>
       @enderror
