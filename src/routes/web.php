@@ -14,12 +14,17 @@ use Illuminate\Support\Facades\Route;
 //     return view('user.auth.login', compact('nav'));
 // });
 
-// Route::get('/admin/login', function () {
-//     $nav = 'none';
-//     return view('admin.auth.login', compact('nav'));
-// });
+Route::get('/admin/login', function () {
+    $nav = 'admin';
+    return view('admin.auth.login', compact('nav'));
+});
 
 // Route::get('/email/verify', function () {
 //     $nav = 'none';
 //     return view('user.auth.verify-email', compact('nav'));
 // });
+
+Route::get('/', function () {
+    $nav = 'user';
+    return view('layouts.app', compact('nav'));
+});

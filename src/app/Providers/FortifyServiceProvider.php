@@ -14,6 +14,12 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Actions\Fortify\CreateNewUser;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
+use Laravel\Fortify\Http\Controllers\RegisteredUserController;
+use App\Http\Responses\VerifyEmailResponse;
+use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
+
+
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -23,10 +29,21 @@ class FortifyServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Fortifyのログイン・登録POSTアクションを自作コントローラーへbind
-        $this->app->bind(LoginResponse::class, LoginController::class);
-        $this->app->bind(RegisterResponse::class, RegisterController::class);
 
-        $this->app->singleton(CreatesNewUsers::class, CreateNewUser::class);
+        $this->app->bind(
+            RegisteredUserController::class,
+            RegisterController::class
+        );
+        $this->app->bind(
+            AuthenticatedSessionController::class,
+            LoginController::class
+        );
+
+
+        // $this->app->bind(LoginResponse::class, LoginController::class);
+        // $this->app->bind(RegisterResponse::class, RegisterController::class);
+
+        // $this->app->singleton(CreatesNewUsers::class, CreateNewUser::class);
     }
 
     /**
@@ -45,7 +62,7 @@ class FortifyServiceProvider extends ServiceProvider
             return view('user.auth.register');
         });
 
-        Fortify::verifyEmailView(fn() => view('user.auth.verify-email'));
+        Fortify::verifyEmailView(fn() => view('auth.verify-email'));
 
         // 管理者ログイン判定（FormRequestでcontext=adminをhiddenで送ること）
         Fortify::authenticateUsing(function (Request $request) {

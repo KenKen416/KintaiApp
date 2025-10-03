@@ -13,7 +13,7 @@
     </ul>
 
     <div class="nav-actions">
-      <form method="POST" action="">
+      <form method="POST" action="{{ route('logout') }}">
         @csrf
         <button type="submit" class="nav-link nav-link-button">ログアウト</button>
       </form>

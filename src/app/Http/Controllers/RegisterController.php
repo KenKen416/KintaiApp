@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Hash;
 
 class RegisterController extends Controller
 {
+    public function create()
+    {
+        return view('user.auth.register');
+    }
     public function store(RegisterRequest $request)
     {
         $user = User::create([
