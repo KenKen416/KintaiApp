@@ -1,0 +1,37 @@
+.content {
+  max-width: 600px;
+  margin: 5rem auto;
+  text-align: center;
+}
+.status{
+  padding: 0.2rem 1rem;
+  background-color: #C8C8C8;
+  border-radius: 50px;
+  display: inline-block;
+  color: #696969;
+  font-weight: bold;
+  font-size: 1.125rem;
+}
+.attendance-date {
+  margin-top: 1.5rem;
+  font-size: 2.5rem;
+}
+
+.current-time {
+  margin-top: 2rem;
+  font-size: 5rem;
+  font-weight: bold;
+}
+
+.clock-out-message {
+  margin-top: 4rem;
+  font-size: 1.625rem;
+  font-weight: bold;
+}
+
+.buttons {
+  margin-top: 4rem;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}

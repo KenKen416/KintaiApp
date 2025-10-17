@@ -1,0 +1,53 @@
+.attendance-list__month-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  background-color: white;
+  border-radius: 10px;
+  font-weight: bold;
+  padding: 0.5rem 1.5rem;
+}
+
+.attendance-list__month-link {
+  color: #737373;
+}
+.calendar-icon {
+  width: 25px;
+  height: 25px;
+}
+
+.attendance-list__table-wrap {
+  background-color: white;
+  border-radius: 10px;
+  margin-top: 2rem;
+}
+.attendance-list__table {
+  width: 100%;
+  font-weight: bold;
+  color: #737373;
+  text-align: center;
+}
+.attendance-list__thead {
+  border-bottom: #E1E1E1 3px solid;
+}
+.attendance-list__tr{
+  border-bottom: #E1E1E1 2px solid;
+}
+
+.attendance-list__td, .attendance-list__th {
+  padding: 0.4rem 0;
+}
+.attendance-list__th--date {
+  width: 20%;
+}
+.attendance-list__th--clock-in,.attendance-list__th--clock-out,.attendance-list__th--break,.attendance-list__th--total {
+  width: 15%;
+}
+
+.attendance-list__th--detail {
+  width: 20%;
+}
+.attendance-list__td--detail {
+  color: black;
+}

@@ -8,7 +8,7 @@
         <a class="nav-link" href="">スタッフ一覧</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="">申請一覧</a>
+        <a class="nav-link" href="{{ route('stamp_correction_request.list') }}">申請一覧</a>
       </li>
     </ul>
 

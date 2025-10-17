@@ -21,3 +21,17 @@
   height: 60px;
   font-size: 1.625rem;
 }
+
+.btn--primary,.btn--secondary {
+  width: 221px;
+  padding: 2rem 3rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+.btn--secondary {
+  background-color: white;
+  color: black;
+}

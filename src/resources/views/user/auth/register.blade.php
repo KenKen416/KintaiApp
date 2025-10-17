@@ -21,7 +21,7 @@
     </div>
     <div class="form-group">
       <label class="form-label" for="email">メールアドレス</label>
-      <input type="email" id="email" name="email" class="form-input" value="{{ old('email') }}" >
+      <input type="text" id="email" name="email" class="form-input" value="{{ old('email') }}" >
       @error('email')
         <div class="error-message">{{ $message }}</div>
       @enderror
@@ -46,6 +46,6 @@
   </form>
 </div>
 <div class="login-link">
-  <a class="hyperlink"href="">ログインはこちら</a>
+  <a class="hyperlink" href="{{ route('login') }}">ログインはこちら</a>
 </div>
 @endsection

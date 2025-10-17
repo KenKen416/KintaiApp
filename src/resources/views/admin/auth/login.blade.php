@@ -10,12 +10,12 @@
 </div>
 
 <div class="content-form">
-  <form class="form-inner" action="" method="POST">
+  <form class="form-inner" action="{{ route('admin.login') }}" method="POST">
     @csrf
     <input type="hidden" name="context" value="admin">
     <div class="form-group">
       <label class="form-label" for="email">メールアドレス</label>
-      <input type="email" id="email" name="email" class="form-input" value="{{ old('email') }}" required>
+      <input type="text" id="email" name="email" class="form-input" value="{{ old('email') }}">
       @error('email')
       <div class="error-message">{{ $message }}</div>
       @enderror

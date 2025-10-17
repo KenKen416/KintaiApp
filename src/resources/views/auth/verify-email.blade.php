@@ -10,7 +10,7 @@
 
   <a href="http://localhost:8025/" class="btn verify-button">認証はこちらから</a>
 
-  <form method="POST" action=""
+  <form method="POST" action="{{ route('verification.send') }}"
     class="verify-email__form">
     @csrf
     <button type="submit" class="verify-email__button">

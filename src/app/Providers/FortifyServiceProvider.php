@@ -2,82 +2,33 @@
 
 namespace App\Providers;
 
-
-use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Fortify\Fortify;
-use Laravel\Fortify\Contracts\LoginResponse;
-use Laravel\Fortify\Contracts\RegisterResponse;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\RegisterController;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use App\Actions\Fortify\CreateNewUser;
-use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use Laravel\Fortify\Http\Controllers\RegisteredUserController;
-use App\Http\Responses\VerifyEmailResponse;
-use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
-
-
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\RegisterController;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 
 class FortifyServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        // Fortifyのログイン・登録POSTアクションを自作コントローラーへbind
-
-        $this->app->bind(
-            RegisteredUserController::class,
-            RegisterController::class
-        );
-        $this->app->bind(
-            AuthenticatedSessionController::class,
-            LoginController::class
-        );
-
-
-        // $this->app->bind(LoginResponse::class, LoginController::class);
-        // $this->app->bind(RegisterResponse::class, RegisterController::class);
-
-        // $this->app->singleton(CreatesNewUsers::class, CreateNewUser::class);
+        // Fortify のコントローラを自前へ差し替え
+        $this->app->bind(RegisteredUserController::class, RegisterController::class);
+        $this->app->bind(AuthenticatedSessionController::class, LoginController::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        Fortify::loginView(function () {
-            if (request()->is('admin/login')) {
-                return view('admin.auth.login');
-            }
-            return view('user.auth.login');
-        });
-
-        Fortify::registerView(function () {
-            return view('user.auth.register');
-        });
-
         Fortify::verifyEmailView(fn() => view('auth.verify-email'));
 
-        // 管理者ログイン判定（FormRequestでcontext=adminをhiddenで送ること）
-        Fortify::authenticateUsing(function (Request $request) {
-            $credentials = $request->only('email', 'password');
-            $user = User::where('email', $credentials['email'])->first();
+        RateLimiter::for('login', function (Request $request) {
 
-            if ($user && Hash::check($credentials['password'], $user->password)) {
-                // 管理者ログインフォームからのPOSTなら is_admin=true のみ許可
-                if ($request->input('context') === 'admin' && !$user->is_admin) {
-                    return null;
-                }
-                // 一般ログインはどちらでもOK
-                return $user;
-            }
-            return null;
+            $key = (string) $request->input('email') . '|' . $request->ip();
+            return Limit::perMinute(10)->by($key);
         });
     }
 }

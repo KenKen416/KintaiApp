@@ -19,11 +19,18 @@ class RedirectIfAuthenticated
      */
     public function handle(Request $request, Closure $next, ...$guards)
     {
-        $guards = empty($guards) ? [null] : $guards;
+        $guards = $guards ?: [null];
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
+                $user = Auth::user();
+
+                // 管理者は管理側へ、一般ユーザーはユーザー側へ
+                $routeName = $user->is_admin
+                    ? 'admin.attendance.list'
+                    : 'attendance.index';
+
+                return redirect()->route($routeName)->with('error', '既にログインしています。');
             }
         }
 

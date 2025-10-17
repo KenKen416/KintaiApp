@@ -137,3 +137,16 @@ p {
     opacity: 0;
   }
 }
+
+.content__inner {
+  margin: 5rem auto;
+  width: calc(100% - 5rem);
+  max-width: 900px;
+}
+
+.content__title {
+  font-size: 1.875rem;
+  font-weight: bold;
+  border-left: 8px solid black;
+  padding-left: 1rem;
+}

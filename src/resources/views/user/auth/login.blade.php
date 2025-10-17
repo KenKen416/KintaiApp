@@ -15,7 +15,7 @@
 
     <div class="form-group">
       <label class="form-label" for="email">メールアドレス</label>
-      <input type="email" id="email" name="email" class="form-input" value="{{ old('email') }}" required>
+      <input type="text" id="email" name="email" class="form-input" value="{{ old('email') }}">
       @error('email')
       <div class="error-message">{{ $message }}</div>
       @enderror
@@ -34,6 +34,6 @@
   </form>
 </div>
 <div class="register-link">
-  <a class="hyperlink" href="">会員登録はこちら</a>
+  <a class="hyperlink" href="{{ route('register') }}">会員登録はこちら</a>
 </div>
 @endsection

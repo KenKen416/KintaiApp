@@ -2,13 +2,13 @@
   <div class="nav-inner">
     <ul class="nav-list">
       <li class="nav-item">
-        <a class="nav-link" href="">勤怠</a>
+        <a class="nav-link" href="{{ route('attendance.index') }}">勤怠</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="">勤怠一覧</a>
+        <a class="nav-link" href="{{ route('attendance.list') }}">勤怠一覧</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="">申請</a>
+        <a class="nav-link" href="{{ route('stamp_correction_request.list') }}">申請</a>
       </li>
     </ul>
 
