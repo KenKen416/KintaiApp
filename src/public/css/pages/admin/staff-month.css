@@ -1,0 +1,116 @@
+
+.date-nav {
+  margin: 3rem auto;
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #eee;
+}
+
+.date-nav__prev,
+.date-nav__next {
+  color: #737373;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 6px 8px;
+}
+
+.date-nav__center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: bold;
+  color:black;
+  font-size: 1.25rem;
+}
+
+.calendar-icon {
+  width: 25px;
+  height: 25px;
+}
+
+.attendance-table-card {
+  margin: 24px auto 0;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.attendance-table {
+  width: 100%;
+  color: #737373;
+  font-weight: bold;
+}
+
+.attendance-table thead th {
+  text-align: center;
+  padding: 14px 22px;
+  border-bottom: 3px solid #E1E1E1;
+}
+
+.attendance-table tbody td {
+  padding: 12px 22px;
+  text-align: center;
+  border-bottom: 2px solid #E1E1E1;
+  vertical-align: middle;
+}
+
+.attendance-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+.link-detail {
+  color:black;
+}
+
+.csv{
+  margin-top: 3rem;
+  text-align: right;
+}
+
+.btn-csv {
+  width: 184px;
+  text-align: center;
+}
+
+
+
+/* レスポンシブ */
+@media (max-width: 640px) {
+  .attendance-table thead {
+    display: none;
+  }
+
+  .attendance-table tbody td {
+    display: block;
+    text-align: left;
+    padding: 10px 12px;
+  }
+
+  .attendance-table tbody tr {
+    border: 1px solid #eee;
+    margin-bottom: 10px;
+    display: block;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .date-nav {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .attendance-table-card {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .date-nav__right {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

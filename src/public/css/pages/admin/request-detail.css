@@ -1,0 +1,48 @@
+.request-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 3rem auto;
+}
+
+.request-table {
+  width: 100%;
+  font-weight: bold;
+}
+
+.request-table tbody tr {
+  border-bottom: 2px solid #E1E1E1;
+}
+
+.request-table th {
+  width: 20%;
+  text-align: left;
+  padding: 18px 50px;
+  color: #737373;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+.request-table td {
+  padding: 18px 20px;
+  text-align: center;
+  vertical-align: middle;
+  color: black;
+}
+
+.approve-actions {
+  margin: 18px auto 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn {
+width: 130px;
+  display: inline-block;
+  border-radius: 5px;
+}
+
+.btn-approved {
+  background: #696969;
+  opacity: 0.95;
+}

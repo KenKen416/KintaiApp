@@ -67,7 +67,7 @@ $tabs = [
 
           <td class="u-nowrap">
             @if ($isAdmin)
-            <a href="" class="link">詳細</a>
+            <a href="{{ route('stamp_correction_request.approve', ['attendance_correct_request' => $c->id]) }}" class="link">詳細</a>
             @else
             <a href="{{ route('attendance.detail', ['id' => $c->attendance_id]) }}" class="link">詳細</a>
             @endif

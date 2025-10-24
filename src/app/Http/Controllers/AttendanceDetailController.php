@@ -13,32 +13,51 @@ use Carbon\Carbon;
 
 class AttendanceDetailController extends Controller
 {
+    /**
+     * 勤怠詳細表示
+     *
+     * - 管理者は任意の勤怠を閲覧できる
+     * - 一般ユーザーは自分の勤怠のみ閲覧可能
+     * - 承認待ち（pending）の修正申請がある場合はその申請内容を優先表示する
+     */
     public function show($id)
     {
-        // 対象勤怠を取得（休憩もまとめて取得）
-        $attendance = Attendance::with('breakTimes')->findOrFail($id);
+        // 対象勤怠を取得（休憩と user をまとめて取得）
+        $attendance = Attendance::with(['breakTimes', 'user'])->findOrFail($id);
 
-        // 本人以外は存在しない扱い（404）
-        if ($attendance->user_id !== Auth::id()) {
+        $user = Auth::user();
+        if (! $user) {
+            abort(403);
+        }
+
+        // 管理者でなければ本人のみ閲覧可
+        if (! ($user->is_admin ?? false) && $attendance->user_id !== $user->id) {
             abort(404);
         }
 
-        // 当該勤怠に対して承認待ち（pending）が存在するか
-        $isPending = AttendanceCorrection::where('attendance_id', $attendance->id)
+        // 当該勤怠に対して最新の承認待ち（pending）申請を取得
+        $pendingCorrection = AttendanceCorrection::where('attendance_id', $attendance->id)
             ->where('status', 'pending')
-            ->exists();
+            ->orderByDesc('created_at')
+            ->first();
+
+        $isPending = (bool) $pendingCorrection;
 
         // 休憩は開始順にソートしてビューへ渡す
         $breaks = $attendance->breakTimes->sortBy('break_start')->values();
 
         return view('user.attendance.detail', [
-            'nav'        => 'user',
-            'attendance' => $attendance,
-            'breaks'     => $breaks,
-            'isPending'  => $isPending,
+            'nav'               => $user->is_admin ? 'admin' : 'user',
+            'attendance'        => $attendance,
+            'breaks'            => $breaks,
+            'isPending'         => $isPending,
+            'pendingCorrection' => $pendingCorrection,
         ]);
     }
 
+    /**
+     * 修正申請を保存する（ユーザーの操作）
+     */
     public function storeCorrection(AttendanceCorrectionRequest $request, int $id): RedirectResponse
     {
         // 対象勤怠を取得（休憩は不要だが安全のためロード）
@@ -49,42 +68,46 @@ class AttendanceDetailController extends Controller
             abort(404);
         }
 
-        // 既に承認待ちの申請がある場合は弾く（早期リターン）
+        // 既に pending がある場合は二重申請を阻止
         $hasPending = AttendanceCorrection::where('attendance_id', $attendance->id)
             ->where('status', 'pending')
             ->exists();
 
         if ($hasPending) {
-            return back()
-                ->with('status', '承認待ちのため修正はできません。')
-                ->withInput();
+            return redirect()->back()->with('error', '既に申請中の修正があります。承認をお待ちください。');
         }
 
-        // 入力（HH:MM）を当日の日時に合成するヘルパ
-        $workDate = $attendance->work_date; // Carbon cast (date)
+        // 入力値整形（時間入力は "HH:MM" 文字列で受け取り、attendance_corrections の datetime へマージ）
+        $clockInInput = $request->input('requested_clock_in');
+        $clockOutInput = $request->input('requested_clock_out');
 
-        $clockIn  = $request->filled('clock_in')
-            ? Carbon::parse($workDate->toDateString() . ' ' . $request->input('clock_in'))
-            : null;
+        $clockIn = null;
+        $clockOut = null;
 
-        $clockOut = $request->filled('clock_out')
-            ? Carbon::parse($workDate->toDateString() . ' ' . $request->input('clock_out'))
-            : null;
+        if ($clockInInput) {
+            // work_date の日付部分を使って datetime を作成
+            $clockIn = Carbon::parse($attendance->work_date->format('Y-m-d') . ' ' . $clockInInput);
+        }
+        if ($clockOutInput) {
+            $clockOut = Carbon::parse($attendance->work_date->format('Y-m-d') . ' ' . $clockOutInput);
+        }
 
-        // 休憩配列を requested_breaks 用に整形
-        $breakStarts = (array) $request->input('break_start', []);
-        $breakEnds   = (array) $request->input('break_end', []);
-        $requestedBreaks = [];
-
-        $count = max(count($breakStarts), count($breakEnds));
-        for ($i = 0; $i < $count; $i++) {
-            $bs = $breakStarts[$i] ?? null;
-            $be = $breakEnds[$i] ?? null;
-
-            $requestedBreaks[] = [
-                'break_start' => $bs ? $workDate->toDateString() . ' ' . $bs : null,
-                'break_end'   => $be ? $workDate->toDateString() . ' ' . $be : null,
-            ];
+        // 休憩は配列で受け取って JSON に（フォームの名前付けに依存）
+        $requestedBreaks = null;
+        if ($request->has('breaks')) {
+            $breaksInput = $request->input('breaks'); // 想定: array of ['break_start' => 'HH:MM', 'break_end' => 'HH:MM']
+            $normalized = [];
+            foreach ($breaksInput as $b) {
+                $bs = $b['break_start'] ?? null;
+                $be = $b['break_end'] ?? null;
+                if ($bs || $be) {
+                    $normalized[] = [
+                        'break_start' => $bs ? Carbon::parse($attendance->work_date->format('Y-m-d') . ' ' . $bs)->toDateTimeString() : null,
+                        'break_end'   => $be ? Carbon::parse($attendance->work_date->format('Y-m-d') . ' ' . $be)->toDateTimeString() : null,
+                    ];
+                }
+            }
+            $requestedBreaks = ! empty($normalized) ? $normalized : null;
         }
 
         // DB トランザクションで作成

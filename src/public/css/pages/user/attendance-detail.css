@@ -81,8 +81,3 @@
   text-align: right;
   font-weight: bold;
 }
-
-.detail-card .detail-table:last-of-type>tbody:last-of-type>tr:last-child th,
-.detail-card .detail-table:last-of-type>tbody:last-of-type>tr:last-child td {
-  border-bottom: none;
-}

@@ -1,0 +1,76 @@
+.detail-card {
+  margin-top: 2rem;
+  border: 1px solid #e6e6e8;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.detail-table {
+  width: 100%;
+}
+
+.detail-table th,
+.detail-table td {
+  border-bottom: 2px solid #E1E1E1;
+  padding: 18px 36px;
+  vertical-align: middle;
+  font-weight: bold;
+  text-align: center;
+}
+
+
+
+.detail-table th {
+  width: 25%;
+  color: #737373;
+  text-align: left;
+  font-weight: bold;
+}
+
+
+
+.time-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #E1E1E1;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.note-input{
+  width: 100%;
+  min-height: 84px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  resize: vertical;
+}
+
+.detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.btn {
+  width: 130px;
+  display: inline-block;
+  padding: 10px 36px;
+  border-radius: 5px;
+  border: 0;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: black;
+  color: #fff;
+  font-weight: bold;
+}
+
+.error {
+  color: #d33;
+  font-size: 12px;
+  margin-top: 8px;
+}
+

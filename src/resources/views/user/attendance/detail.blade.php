@@ -5,7 +5,7 @@
 @endsection
 @section('content')
 @php
-$date = $attendance->work_date; // Carbon (cast: date)
+$date = $attendance->work_date;
 @endphp
 
 <div class="content__inner">
@@ -15,7 +15,7 @@ $date = $attendance->work_date; // Carbon (cast: date)
       <tbody>
         <tr>
           <th scope="row">名前</th>
-          <td class="u-center">{{ auth()->user()->name }}</td>
+          <td class="u-center">{{ $attendance->user->name ?? auth()->user()->name }}</td>
           <td></td>
           <td></td>
         </tr>
@@ -27,6 +27,7 @@ $date = $attendance->work_date; // Carbon (cast: date)
         </tr>
       </tbody>
     </table>
+
 
     {{-- 編集可能なフォーム（承認待ちでないとき） --}}
     @if (! $isPending)
@@ -49,88 +50,112 @@ $date = $attendance->work_date; // Carbon (cast: date)
             </td>
           </tr>
 
-          {{-- 休憩行: 既存休憩分 + 追加1行 --}}
+          {{-- 休憩入力（既存の UI 構造を維持） --}}
           @php
-          $maxRows = max(2, $breaks->count() + 1);
+          $existingBreaks = $attendance->breakTimes->values();
           @endphp
+          @foreach ($existingBreaks as $i => $b)
+          <tr>
+            <th>休憩{{ $i === 0 ? '' : $i + 1 }}</th>
+            <td>
+              <input type="time" name="breaks[{{ $i }}][break_start]" class="time-input" value="{{ old("breaks.$i.break_start", optional($b->break_start)->format('H:i')) }}">
+            </td>
+            <td class="tilde">〜</td>
+            <td>
+              <input type="time" name="breaks[{{ $i }}][break_end]" class="time-input" value="{{ old("breaks.$i.break_end", optional($b->break_end)->format('H:i')) }}">
+            </td>
+          </tr>
+          @endforeach
 
-          @for ($i = 0; $i < $maxRows; $i++)
-            @php
-            $b=$breaks[$i] ?? null;
-            $start=old("requested_break_start.$i", $b?->break_start?->format('H:i'));
-            $end = old("requested_break_end.$i", $b?->break_end?->format('H:i'));
-            @endphp
-            <tr>
-              <th>休憩{{ $i === 0 ? '' : $i + 1 }}</th>
-              <td>
-                <input id="requested_break_start_{{ $i }}" type="time" name="requested_break_start[]" class="time-input" value="{{ $start }}">
-                @error("requested_break_start.$i") <div class="error">{{ $message }}</div> @enderror
-              </td>
-              <td>
-                <span class="tilde">〜</span>
-              </td>
-              <td>
-                <input id="requested_break_end_{{ $i }}" type="time" name="requested_break_end[]" class="time-input" value="{{ $end }}">
-                @error("requested_break_end.$i") <div class="error">{{ $message }}</div> @enderror
-              </td>
-            </tr>
-            @endfor
+          {{-- 新規休憩入力欄（1つ追加分） --}}
+          <tr>
+            <th>休憩{{ $existingBreaks->count() === 0 ? '' : $existingBreaks->count() + 1 }}</th>
+            <td>
+              <input type="time" name="breaks[{{ $existingBreaks->count() }}][break_start]" class="time-input" value="{{ old("breaks." . $existingBreaks->count() . ".break_start") }}">
+            </td>
+            <td class="tilde">〜</td>
+            <td>
+              <input type="time" name="breaks[{{ $existingBreaks->count() }}][break_end]" class="time-input" value="{{ old("breaks." . $existingBreaks->count() . ".break_end") }}">
+            </td>
+          </tr>
 
-            <tr>
-              <th>備考</th>
-              <td colspan="3">
-                <textarea name="requested_note" rows="4" placeholder="修正理由などを入力してください">{{ old('requested_note', $attendance->note) }}</textarea>
-                @error('requested_note') <div class="error">{{ $message }}</div> @enderror
-              </td>
-            </tr>
+          <tr>
+            <th>備考</th>
+            <td colspan="3">
+              <textarea name="requested_note" rows="4" placeholder="修正理由などを入力してください">{{ old('requested_note', $attendance->note) }}</textarea>
+              @error('requested_note') <div class="error">{{ $message }}</div> @enderror
+            </td>
+          </tr>
         </tbody>
       </table>
   </div>
-
   <div class="detail-actions">
     <button type="submit" class="btn btn-primary">修正</button>
   </div>
   </form>
 
-  {{-- 承認待ちのときは表示のみ --}}
+  {{-- 承認待ちのときは表示のみ（申請内容を優先表示） --}}
   @else
+  @php
+  $corr = $pendingCorrection;
+  $formatTime = fn($v) => $v ? \Illuminate\Support\Carbon::parse($v)->format('H:i') : '';
+  // requested_breaks may be array (cast) or null
+  $displayBreaks = [];
+  if (! empty($corr->requested_breaks) && is_array($corr->requested_breaks)) {
+  foreach ($corr->requested_breaks as $b) {
+  $displayBreaks[] = [
+  'break_start' => $b['break_start'] ?? null,
+  'break_end' => $b['break_end'] ?? null,
+  ];
+  }
+  } else {
+  foreach ($breaks as $b) {
+  $displayBreaks[] = [
+  'break_start' => $b->break_start,
+  'break_end' => $b->break_end,
+  ];
+  }
+  }
+
+  $displayClockIn = $corr->requested_clock_in ? $formatTime($corr->requested_clock_in) : ($attendance->clock_in ? $formatTime($attendance->clock_in) : '');
+  $displayClockOut = $corr->requested_clock_out ? $formatTime($corr->requested_clock_out) : ($attendance->clock_out ? $formatTime($attendance->clock_out) : '');
+  $displayNote = $corr->requested_note ?: ($attendance->note ?: '—');
+  @endphp
+
   <table class="detail-table">
     <tbody>
       <tr>
         <th>出勤・退勤</th>
         <td>
-          {{ $attendance->clock_in?->format('H:i') ?? '' }}
+          {{ $displayClockIn }}
         </td>
-        <td class="tilde">
-          〜
-        </td>
+        <td class="tilde">〜</td>
         <td>
-          {{ $attendance->clock_out?->format('H:i') ?? '' }}
+          {{ $displayClockOut }}
         </td>
       </tr>
 
-      @foreach ($breaks as $i => $b)
+      @foreach ($displayBreaks as $i => $b)
       <tr>
         <th>休憩{{ $i === 0 ? '' : $i + 1 }}</th>
         <td>
-          {{ $b->break_start?->format('H:i') ?? '' }}
+          {{ $b['break_start'] ? \Illuminate\Support\Carbon::parse($b['break_start'])->format('H:i') : '' }}
         </td>
-        <td class="tilde">
-          〜
-        </td>
+        <td class="tilde">〜</td>
         <td>
-          {{ $b->break_end?->format('H:i') ?? '' }}
+          {{ $b['break_end'] ? \Illuminate\Support\Carbon::parse($b['break_end'])->format('H:i') : '' }}
         </td>
       </tr>
       @endforeach
 
       <tr>
         <th>備考</th>
-        <td colspan="3">{{ $attendance->note }}</td>
+        <td colspan="3">{{ $displayNote }}</td>
       </tr>
     </tbody>
   </table>
 </div>
+
 <p id="detail-note" class="pending-note">＊承認待ちのため修正はできません。</p>
 @endif
 

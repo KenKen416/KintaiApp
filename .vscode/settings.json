@@ -4,11 +4,13 @@
     "encrypter",
     "endauth",
     "enderror",
+    "endforelse",
     "endphp",
     "endsection",
     "Envoyer",
     "fastcgi",
     "filesize",
+    "forelse",
     "Kintai",
     "Laracasts",
     "laravel",
@@ -18,7 +20,11 @@
     "necolas",
     "phar",
     "phpmyadmin",
+    "phpredis",
+    "phpunit",
+    "sslmode",
     "TINYINT",
+    "validpassword",
     "VARCHAR"
   ]
 }

@@ -42,7 +42,7 @@ class StampCorrectionRequestController extends Controller
     }
 
     /**
-     * 管理者判定（将来的に Gate や middleware に差し替え可能）
+     * 管理者判定
      */
     protected function isAdmin($user): bool
     {
