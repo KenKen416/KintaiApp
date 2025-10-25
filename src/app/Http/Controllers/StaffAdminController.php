@@ -170,7 +170,6 @@ class StaffAdminController extends Controller
 
         $staff = User::findOrFail($id);
 
-
         $monthParam = $request->query('month');
         if (! empty($monthParam) && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $monthParam)) {
             try {
@@ -201,22 +200,37 @@ class StaffAdminController extends Controller
             $fh = fopen('php://output', 'w');
             // UTF-8 BOM を追加すると Excel で開いた際に文字化けしにくくなります
             fwrite($fh, "\xEF\xBB\xBF");
-            // ヘッダ行
-            fputcsv($fh, ['日付', '出勤', '退勤', '休憩合計(分)', '勤務合計(H:MM)']);
+            // ヘッダ行（休憩合計を H:MM 表示にする旨を明示）
+            fputcsv($fh, ['日付', '出勤', '退勤', '休憩合計(H:MM)', '勤務合計(H:MM)']);
+
+            // 日本語曜日マップ（日:0 ... 土:6）
+            $weekdays = ['日', '月', '火', '水', '木', '金', '土'];
 
             // 月の日ごとにループして、実績がない日も空欄の行として出力する
-            $period = CarbonPeriod::create($start, $end);
+            $period = \Carbon\CarbonPeriod::create($start, $end);
             foreach ($period as $day) {
                 $key = $day->format('Y-m-d');
                 $a = $attendances->get($key);
+
+                // 日付表示を一覧と同じ形式にする（例: 10/01（水））
+                $displayDate = $day->format('m/d') . '（' . $weekdays[$day->dayOfWeek] . '）';
 
                 if ($a) {
                     // 実績あり
                     $breakTotal = 0;
                     foreach ($a->breakTimes as $b) {
                         if ($b->break_start && $b->break_end) {
+                            // BreakTime の cast が datetime なら diffInMinutes が使える
                             $breakTotal += $b->break_end->diffInMinutes($b->break_start);
                         }
+                    }
+
+                    // 休憩合計を H:MM に整形（0 分の場合は空文字列に）
+                    $breakTotalStr = '';
+                    if ($breakTotal > 0) {
+                        $bh = intdiv($breakTotal, 60);
+                        $bm = $breakTotal % 60;
+                        $breakTotalStr = sprintf('%d:%02d', $bh, $bm);
                     }
 
                     $workTotal = '';
@@ -228,19 +242,19 @@ class StaffAdminController extends Controller
                     }
 
                     fputcsv($fh, [
-                        $day->format('Y/m/d'),
+                        $displayDate,
                         $a->clock_in ? $a->clock_in->format('H:i') : '',
                         $a->clock_out ? $a->clock_out->format('H:i') : '',
-                        $breakTotal,
+                        $breakTotalStr,
                         $workTotal,
                     ]);
                 } else {
                     // 実績なし：日付のみ出力し、他は空欄にする
                     fputcsv($fh, [
-                        $day->format('Y/m/d'),
+                        $displayDate,
                         '', // 出勤
                         '', // 退勤
-                        '', // 休憩合計(分)
+                        '', // 休憩合計(H:MM)
                         '', // 勤務合計(H:MM)
                     ]);
                 }
