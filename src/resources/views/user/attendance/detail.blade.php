@@ -59,10 +59,16 @@ $date = $attendance->work_date;
             <th>休憩{{ $i === 0 ? '' : $i + 1 }}</th>
             <td>
               <input type="time" name="breaks[{{ $i }}][break_start]" class="time-input" value="{{ old("breaks.$i.break_start", optional($b->break_start)->format('H:i')) }}">
+              @error("breaks.{$i}.break_start")
+              <div class="error">{{ $message }}</div>
+              @enderror
             </td>
             <td class="tilde">〜</td>
             <td>
               <input type="time" name="breaks[{{ $i }}][break_end]" class="time-input" value="{{ old("breaks.$i.break_end", optional($b->break_end)->format('H:i')) }}">
+              @error("breaks.{$i}.break_end")
+              <div class="error">{{ $message }}</div>
+              @enderror
             </td>
           </tr>
           @endforeach

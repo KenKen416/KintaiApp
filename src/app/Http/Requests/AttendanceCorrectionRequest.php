@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Attendance;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Arr;
 
 class AttendanceCorrectionRequest extends FormRequest
 {
@@ -35,50 +36,63 @@ class AttendanceCorrectionRequest extends FormRequest
      *
      * @return array
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            'requested_clock_in'         => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
-            'requested_clock_out'        => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
-            'requested_break_start'      => ['array'],
-            'requested_break_start.*'    => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
-            'requested_break_end'        => ['array'],
-            'requested_break_end.*'      => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
-            'requested_note'             => ['required', 'string'],
+            'requested_clock_in' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
+            'requested_clock_out' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
+
+            // breaks 配列を期待（ビュー側の name に合わせる）
+            'breaks' => ['array'],
+            'breaks.*.break_start' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
+            'breaks.*.break_end' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
+
+            'requested_note' => ['required', 'string'],
         ];
     }
 
-    public function messages(): array
+    public function messages()
     {
         return [
-            'requested_clock_in.regex'       => '時刻は HH:MM 形式で入力してください',
-            'requested_clock_out.regex'      => '時刻は HH:MM 形式で入力してください',
-            'requested_break_start.*.regex'  => '時刻は HH:MM 形式で入力してください',
-            'requested_break_end.*.regex'    => '時刻は HH:MM 形式で入力してください',
-            'requested_note.required'        => '備考を記入してください',
+            'requested_clock_in.regex' => '出勤時刻の形式が不正です（HH:MM）。',
+            'requested_clock_out.regex' => '退勤時刻の形式が不正です（HH:MM）。',
+            'breaks.*.break_start.regex' => '時刻は HH:MM 形式で入力してください',
+            'breaks.*.break_end.regex' => '時刻は HH:MM 形式で入力してください',
+            'requested_note.required' => '備考を記入してください',
         ];
     }
 
+    /**
+     * 追加の検証（時刻の前後関係や休憩の整合性チェック）
+     */
     public function withValidator($validator): void
     {
         $validator->after(function ($v) {
+            // 出勤・退勤
             $in  = $this->input('requested_clock_in');
             $out = $this->input('requested_clock_out');
 
+            $inT = $in ? $this->parseTime($in) : null;
+            $outT = $out ? $this->parseTime($out) : null;
+
             if ($in && $out) {
-                $inT  = $this->parseTime($in);
-                $outT = $this->parseTime($out);
                 if ($inT === null || $outT === null) {
-                    // 形式エラーは個別に出るのでここでは省略
+                    // フォーマットエラーは個別ルールで拾う
                 } elseif ($inT->gte($outT)) {
                     $v->errors()->add('requested_clock_in', '出勤時間もしくは退勤時間が不適切な値です');
                 }
             }
 
-            $bs = (array) $this->input('requested_break_start', []);
-            $be = (array) $this->input('requested_break_end', []);
-            $n  = max(count($bs), count($be));
+            // breaks 配列から start/end を取得して検証
+            $breaks = (array) $this->input('breaks', []);
+            $bs = [];
+            $be = [];
+            foreach ($breaks as $b) {
+                $bs[] = Arr::get($b, 'break_start', null);
+                $be[] = Arr::get($b, 'break_end', null);
+            }
 
+            $n = max(count($bs), count($be));
             for ($i = 0; $i < $n; $i++) {
                 $s = $bs[$i] ?? null;
                 $e = $be[$i] ?? null;
@@ -87,36 +101,44 @@ class AttendanceCorrectionRequest extends FormRequest
                     $sT = $this->parseTime($s);
                     $eT = $this->parseTime($e);
                     if ($sT === null || $eT === null) {
-                        // 形式エラーは個別メッセージで
+                        // 形式エラーは rules/messages で検出
                     } else {
                         if ($sT->gte($eT)) {
-                            $v->errors()->add("requested_break_start.$i", '休憩時間が不適切な値です');
+                            $v->errors()->add("breaks.{$i}.break_start", '休憩時間が不適切な値です');
                         }
                     }
                 }
 
-                if ($s && $in) {
+                // 出勤/退勤 と比較した整合チェック
+                if ($s && $inT) {
                     $sT = $this->parseTime($s);
-                    $inT = $this->parseTime($in);
-                    if ($sT !== null && $inT !== null && $sT->lt($inT)) {
-                        $v->errors()->add("requested_break_start.$i", '休憩時間が不適切な値です');
+                    if ($sT && $sT->lt($inT)) {
+                        $v->errors()->add("breaks.{$i}.break_start", '休憩時間が不適切な値です');
                     }
                 }
 
-                if ($e && $out) {
+                if ($e && $outT) {
                     $eT = $this->parseTime($e);
-                    $outT = $this->parseTime($out);
-                    if ($eT !== null && $outT !== null && $eT->gt($outT)) {
-                        $v->errors()->add("requested_break_end.$i", '休憩時間もしくは退勤時間が不適切な値です');
+                    if ($eT && $eT->gt($outT)) {
+                        $v->errors()->add("breaks.{$i}.break_end", '休憩時間もしくは退勤時間が不適切な値です');
                     }
                 }
             }
         });
     }
 
-    private function parseTime(string $time): ?Carbon
+    /**
+     * ヘルパ: 時刻 "HH:MM" を Carbon に変換する。パースできなければ null。
+     */
+    private function parseTime(?string $time): ?Carbon
     {
-        $dt = Carbon::createFromFormat('H:i', $time);
-        return $dt ?: null;
+        if (empty($time)) {
+            return null;
+        }
+        try {
+            return Carbon::createFromFormat('H:i', $time);
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 }

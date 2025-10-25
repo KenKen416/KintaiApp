@@ -129,6 +129,10 @@ class AdminAttendanceRequest extends FormRequest
                     if ($in && $bs && $bs->lt($in)) {
                         $v->errors()->add("breaks.{$i}.break_start", '休憩時間が不適切な値です');
                     }
+
+                    if ($out && $bs && $bs->gt($out)) {
+                        $v->errors()->add("breaks.{$i}.break_start", '休憩時間が不適切な値です');
+                    }
                     if ($out && $be && $be->gt($out)) {
                         $v->errors()->add("breaks.{$i}.break_end", '休憩時間もしくは退勤時間が不適切な値です');
                     }

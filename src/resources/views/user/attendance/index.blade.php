@@ -44,7 +44,7 @@
     @elseif ($status === 'working')
       <form method="POST" action="{{ route('attendance.clock_out') }}">
         @csrf
-        <button type="submit" class="btn btn--primary">退 勤</button>
+        <button type="submit" class="btn btn--primary">退勤</button>
       </form>
       <form method="POST" action="{{ route('attendance.break_start') }}">
         @csrf
