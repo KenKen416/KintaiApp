@@ -117,6 +117,13 @@ class AttendanceCorrectionRequest extends FormRequest
                     }
                 }
 
+                if ($s && $outT) {
+                    $sT = $this->parseTime($s);
+                    if ($sT && $outT && $sT->gt($outT)) {
+                        $v->errors()->add("breaks.{$i}.break_start", '休憩時間が不適切な値です');
+                    }
+                }
+
                 if ($e && $outT) {
                     $eT = $this->parseTime($e);
                     if ($eT && $eT->gt($outT)) {
