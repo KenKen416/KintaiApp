@@ -9,13 +9,7 @@ use App\Models\Attendance;
 
 class AdminAttendanceRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * 管理者チェックと対象勤怠の存在確認を行います。
-     *
-     * @return bool
-     */
+
     public function authorize(): bool
     {
         $user = Auth::user();
@@ -31,13 +25,7 @@ class AdminAttendanceRequest extends FormRequest
         return (bool) $attendance;
     }
 
-    /**
-     * バリデーションルール
-     *
-     * 備考（note）は管理者による修正時は必須とします。
-     *
-     * @return array
-     */
+
     public function rules(): array
     {
         return [
@@ -46,16 +34,11 @@ class AdminAttendanceRequest extends FormRequest
             'breaks'                  => ['nullable', 'array'],
             'breaks.*.break_start'    => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
             'breaks.*.break_end'      => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
-            // ここで必須化（管理者が修正する際は備考必須）
             'note'                    => ['required', 'string'],
         ];
     }
 
-    /**
-     * 日本語メッセージのカスタマイズ
-     *
-     * @return array
-     */
+
     public function messages(): array
     {
         return [
@@ -69,14 +52,6 @@ class AdminAttendanceRequest extends FormRequest
         ];
     }
 
-    /**
-     * 追加の検証（時刻の前後関係や休憩の整合性チェック）
-     *
-     * withValidator を利用して複雑なチェックを行います。
-     *
-     * @param \Illuminate\Validation\Validator $validator
-     * @return void
-     */
     public function withValidator($validator): void
     {
         $validator->after(function ($v) {
@@ -91,7 +66,6 @@ class AdminAttendanceRequest extends FormRequest
                 ? $attendance->work_date->format('Y-m-d')
                 : Carbon::parse($attendance->work_date)->format('Y-m-d');
 
-            // parse helper (HH:MM -> Carbon)
             $parse = function ($time) use ($date) {
                 if (! $time) return null;
                 try {
@@ -108,7 +82,6 @@ class AdminAttendanceRequest extends FormRequest
                 $v->errors()->add('clock_in', '出勤時間もしくは退勤時間が不適切な値です');
             }
 
-            // breaks validation: each break_start < break_end, and within [in, out] if both exist
             $breaks = $this->input('breaks', []);
             if (is_array($breaks)) {
                 foreach ($breaks as $i => $b) {

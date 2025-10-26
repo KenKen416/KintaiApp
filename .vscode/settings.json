@@ -1,6 +1,8 @@
 {
   "cSpell.words": [
     "Autoloaded",
+    "dont",
+    "eastwest",
     "encrypter",
     "endauth",
     "enderror",
@@ -8,9 +10,11 @@
     "endphp",
     "endsection",
     "Envoyer",
+    "fakerphp",
     "fastcgi",
     "filesize",
     "forelse",
+    "guzzlehttp",
     "kinmugai",
     "Kintai",
     "kyuukeichu",
@@ -18,17 +22,21 @@
     "laravel",
     "libzip",
     "mbstring",
+    "mxfile",
     "mysqld",
     "necolas",
+    "nunomaduro",
     "phar",
     "phpmyadmin",
     "phpredis",
     "phpunit",
+    "Rmand",
     "shukkinchu",
     "sslmode",
     "taikinzumi",
     "TINYINT",
     "validpassword",
-    "VARCHAR"
+    "VARCHAR",
+    "Ywaly"
   ]
 }

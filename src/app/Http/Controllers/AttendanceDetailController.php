@@ -13,13 +13,6 @@ use Carbon\Carbon;
 
 class AttendanceDetailController extends Controller
 {
-    /**
-     * 勤怠詳細表示
-     *
-     * - 管理者は任意の勤怠を閲覧できる
-     * - 一般ユーザーは自分の勤怠のみ閲覧可能
-     * - 承認待ち（pending）の修正申請がある場合はその申請内容を優先表示する
-     */
     public function show($id)
     {
         // 対象勤怠を取得（休憩と user をまとめて取得）
@@ -55,9 +48,6 @@ class AttendanceDetailController extends Controller
         ]);
     }
 
-    /**
-     * 修正申請を保存する（ユーザーの操作）
-     */
     public function storeCorrection(AttendanceCorrectionRequest $request, int $id): RedirectResponse
     {
         // 対象勤怠を取得（休憩は不要だが安全のためロード）

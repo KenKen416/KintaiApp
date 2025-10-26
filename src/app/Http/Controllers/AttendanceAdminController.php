@@ -68,11 +68,6 @@ class AttendanceAdminController extends Controller
         ]);
     }
 
-    /**
-     * 管理者向け：勤怠詳細表示（管理者画面）
-     */
-
-
     public function show($id): View
     {
         $user = Auth::user();
@@ -91,9 +86,6 @@ class AttendanceAdminController extends Controller
         ]);
     }
 
-    /**
-     * 管理者: 勤怠を直接更新する
-     */
     public function update(AdminAttendanceRequest $request, $id): RedirectResponse
     {
         $user = Auth::user();
@@ -153,6 +145,4 @@ class AttendanceAdminController extends Controller
         return redirect()->route('admin.attendance.show', ['id' => $attendance->id])
             ->with('success', '勤怠を更新しました。');
     }
-
-
 }

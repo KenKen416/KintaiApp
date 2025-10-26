@@ -13,15 +13,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class StaffAdminController extends Controller
 {
-    /**
-     * 管理者: スタッフ一覧
-     * GET /admin/staff/list
-     *
-     * ページネーションを使用せず、全スタッフ（一般ユーザー）を取得して表示します。
-     *
-     * @param Request $request
-     * @return View
-     */
     public function index(Request $request): View
     {
         $user = Auth::user();
@@ -45,19 +36,6 @@ class StaffAdminController extends Controller
         ]);
     }
 
-    /**
-     * 管理者: 指定スタッフの「現在の月」の月次勤怠一覧表示
-     * GET /admin/attendance/staff/{id}
-     *
-     * 仕様: 常に現在の月を表示します（クエリの month パラメータは無視）。
-     *
-     * 各日（startOfMonth..endOfMonth）を必ず行として作成し、
-     * 当該日に Attendance レコードがあれば表示、なければ空行（出勤・退勤・休憩は空）を表示します。
-     *
-     * @param Request $request
-     * @param int|string $id
-     * @return View
-     */
     public function attendance(Request $request, $id): View
     {
         $user = Auth::user();
@@ -83,7 +61,6 @@ class StaffAdminController extends Controller
         $start = $base->copy()->startOfMonth();
         $end = $base->copy()->endOfMonth();
 
-        // まず当該月の attendances を取って map にする（キー: YYYY-MM-DD）
         $attendances = Attendance::with('breakTimes')
             ->where('user_id', $staff->id)
             ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
@@ -91,7 +68,6 @@ class StaffAdminController extends Controller
             ->get()
             ->keyBy(fn($a) => $a->work_date->format('Y-m-d'));
 
-        // CarbonPeriod で当月の日ごとに行を作る（出勤データがなければ attendance=null の行を作成）
         $period = CarbonPeriod::create($start, $end);
 
         $rows = collect();
@@ -133,8 +109,6 @@ class StaffAdminController extends Controller
                     'date' => $day,
                     'clock_in' => '',
                     'clock_out' => '',
-                    // ここを 0 ではなく null にすることで、ビューのフォーマッタが空文字を返し
-                    // "0:00" 表示にならず空欄（'-'）になります
                     'break_total_minutes' => null,
                     'work_total_minutes' => null,
                 ]);
@@ -151,16 +125,6 @@ class StaffAdminController extends Controller
         ]);
     }
 
-    /**
-     * 管理者: 指定スタッフの「現在の月」の月次勤怠を CSV 出力
-     * GET /admin/attendance/staff/{id}/export
-     *
-     * 仕様変更: 出勤実績がない日も含めて当該月の日ごとに CSV に出力します。
-     *
-     * @param Request $request
-     * @param int|string $id
-     * @return StreamedResponse
-     */
     public function exportAttendance(Request $request, $id): StreamedResponse
     {
         $user = Auth::user();
@@ -186,7 +150,6 @@ class StaffAdminController extends Controller
         $start = $base->copy()->startOfMonth();
         $end = $base->copy()->endOfMonth();
 
-        // 取得した attendances をキー付きコレクションにする
         $attendances = Attendance::with('breakTimes')
             ->where('user_id', $staff->id)
             ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
@@ -198,7 +161,7 @@ class StaffAdminController extends Controller
 
         $response = new StreamedResponse(function () use ($attendances, $start, $end) {
             $fh = fopen('php://output', 'w');
-            // UTF-8 BOM を追加すると Excel で開いた際に文字化けしにくくなります
+
             fwrite($fh, "\xEF\xBB\xBF");
             // ヘッダ行（休憩合計を H:MM 表示にする旨を明示）
             fputcsv($fh, ['日付', '出勤', '退勤', '休憩合計(H:MM)', '勤務合計(H:MM)']);
@@ -220,7 +183,7 @@ class StaffAdminController extends Controller
                     $breakTotal = 0;
                     foreach ($a->breakTimes as $b) {
                         if ($b->break_start && $b->break_end) {
-                            // BreakTime の cast が datetime なら diffInMinutes が使える
+
                             $breakTotal += $b->break_end->diffInMinutes($b->break_start);
                         }
                     }

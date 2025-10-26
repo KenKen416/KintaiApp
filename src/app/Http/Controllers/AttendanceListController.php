@@ -10,22 +10,18 @@ use App\Models\Attendance;
 
 class AttendanceListController extends Controller
 {
-    /**
-     * 勤怠一覧（自ユーザー、月次）表示
-     * GET /attendance/list?month=YYYY-MM
-     */
     public function index(Request $request)
     {
         $user = Auth::user();
 
-        $monthParam    = $request->query('month'); // YYYY-MM 形式想定
+        $monthParam    = $request->query('month');
         $baseDate      = $this->resolveBaseDate($monthParam);
         $startOfMonth  = $baseDate->copy()->startOfMonth();
         $endOfMonth    = $baseDate->copy()->endOfMonth();
 
         $attendances = Attendance::where('user_id', $user->id)
             ->whereBetween('work_date', [$startOfMonth->toDateString(), $endOfMonth->toDateString()])
-            ->with('breakTimes') // 休憩合計計算用
+            ->with('breakTimes')
             ->get()
             ->keyBy(fn($a) => $a->work_date->format('Y-m-d'));
 
@@ -52,7 +48,7 @@ class AttendanceListController extends Controller
             return Carbon::today()->startOfMonth();
         }
 
-        // Carbon生成（例外を投げない書式）例えば、 2023-02-31 のような日付が不正な場合は false を返す
+        // Carbon でのパース失敗 -> 当月
         $dt = Carbon::createFromFormat('Y-m', $monthParam);
         if ($dt === false) {
             return Carbon::today()->startOfMonth();

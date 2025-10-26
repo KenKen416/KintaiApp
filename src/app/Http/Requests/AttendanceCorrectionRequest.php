@@ -10,11 +10,6 @@ use Illuminate\Support\Arr;
 
 class AttendanceCorrectionRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
     public function authorize()
     {
         $attendanceId = $this->route('id');
@@ -31,18 +26,12 @@ class AttendanceCorrectionRequest extends FormRequest
         return $attendance->user_id === Auth::id();
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function rules()
     {
         return [
             'requested_clock_in' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
             'requested_clock_out' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
 
-            // breaks 配列を期待（ビュー側の name に合わせる）
             'breaks' => ['array'],
             'breaks.*.break_start' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
             'breaks.*.break_end' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
@@ -62,9 +51,7 @@ class AttendanceCorrectionRequest extends FormRequest
         ];
     }
 
-    /**
-     * 追加の検証（時刻の前後関係や休憩の整合性チェック）
-     */
+
     public function withValidator($validator): void
     {
         $validator->after(function ($v) {
@@ -134,9 +121,6 @@ class AttendanceCorrectionRequest extends FormRequest
         });
     }
 
-    /**
-     * ヘルパ: 時刻 "HH:MM" を Carbon に変換する。パースできなければ null。
-     */
     private function parseTime(?string $time): ?Carbon
     {
         if (empty($time)) {

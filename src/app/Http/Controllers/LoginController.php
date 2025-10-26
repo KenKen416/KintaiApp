@@ -10,17 +10,8 @@ use App\Http\Requests\LoginRequest;
 
 class LoginController extends Controller
 {
-    // GET /login /admin/login
     public function create(Request $request)
     {
-        // if (Auth::check()) {
-        //     return redirect()->intended(Auth::user()->is_admin ? '/admin/attendance/list' : '/attendance');
-        // }
-        // $nav = 'none';
-        // if ($request->is('admin/login')) {
-        //     return view('admin.auth.login', compact('nav'));
-        // }
-        // return view('user.auth.login', compact('nav'));
         $user = Auth::user();
         $isAdminLoginPage = $request->is('admin/login');
 
@@ -103,7 +94,6 @@ class LoginController extends Controller
         return redirect()->intended('/attendance');
     }
 
-    // POST /logout
     public function destroy(Request $request)
     {
         $user = Auth::user();

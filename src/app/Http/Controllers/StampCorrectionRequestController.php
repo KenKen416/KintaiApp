@@ -41,17 +41,11 @@ class StampCorrectionRequestController extends Controller
         ]);
     }
 
-    /**
-     * 管理者判定
-     */
     protected function isAdmin($user): bool
     {
         return (bool) ($user->is_admin ?? false);
     }
 
-    /**
-     * 管理者向け: 全ユーザー分の申請取得
-     */
     protected function getAdminCorrections(string $status)
     {
         return AttendanceCorrection::with(['attendance.user'])
@@ -60,9 +54,7 @@ class StampCorrectionRequestController extends Controller
             ->get();
     }
 
-    /**
-     * 一般ユーザー向け: 自分の申請のみ取得
-     */
+
     protected function getUserCorrections(int $userId, string $status)
     {
         return AttendanceCorrection::with(['attendance'])
