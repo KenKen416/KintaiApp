@@ -5,77 +5,95 @@
 
 ---
 
-##　環境構築
+## 環境構築
 
 ### 開発環境立ち上げ
 
-  1.リポジトリをクローン<br>
+#### 1.リポジトリをクローン
 
 - git clone git@github.com:KenKen416/KintaiApp.git
 
-  2.ディレクトリ移動
+#### 2.ディレクトリ移動
 
 - cd KintaiApp
 
-  3.コマンド実行
+#### 3.コマンド実行
 
 - make init
 
 ### テスト環境
 
-PHPUnit を利用したテストが可能です。
-
-1.テスト用データベースの作成
+#### 1.テスト用データベースの作成
 
 - docker-compose exec mysql bash
 - mysql -u root -p
   （補足）パスワードは root と入力
 - create database demo_test;
 
-  2.テスト実行
+#### 2.テスト実行
 
 - docker compose exec php php artisan test
+
+---
 
 ## ログイン情報
 
 ### 管理者アカウント
 
-email: admin@admin
-password: password
+- email: admin@admin
+- password: password
 
 ### 一般ユーザー
 
-email: test1@test
-password: password
+- email: test1@test
+- password: password
 
----
+- email: test2@test
+- password: password
 
-email: test2@test
-password: password
+- email: test3@test
+- password: password
 
----
+- email: test4@test
+- password: password
 
-email: test3@test
-password: password
-
----
-
-email: test4@test
-password: password
-
----
-
-email: test5@test
-password: password
+- email: test5@test
+- password: password
 
 ---
 
 ## 使用技術
 
-laravel 8.6.12
-php 8.2
-nginx:1.21.1
-mysql:8.0.29
-mailhog
+- laravel 8.6.12
+- php 8.2
+- nginx:1.21.1
+- mysql:8.0.29
+- mailhog
 
-勤怠一覧で、詳細に飛ばすのは勤務があったものだけにすることを、コーチと会話したことを明記する。
+---
+
+## ER 図
+
+![alt](ER図.png)
+
+---
+
+## URL
+
+- 開発環境：http://localhost/
+- phpMyAdmin:http://localhost:8080
+- MailHog UI:http://localhost:8025
+
+## そのほかの仕様・テーブル情報など
+
+https://docs.google.com/spreadsheets/d/1WB1N4ZaWeAfJIsa0ODOfAHezSz0QLbAKunI3FkNwKrc/edit?gid=1113232830#gid=1113232830
+
+---
+
+## 採点者の方へ
+
+下記の通り、担当コーチと会話をして、仕様を修正もしくは、仕様書には書かれていなかった部分の仕様決めを行いました。
+
+- 勤怠一覧画面：勤務実績がない日は詳細ボタンを配置しない
+- バリデーション文言：機能要件とテストケース一覧に置いて、バリデーション文言が異なるものがあったが、機能要件シートを正としてテストは実施。（勤務と休憩の時間の関係性のあたりの文言です。）
+- 勤務実績修正画面におけるフォーム：UI 改善を目的に、入力方法をテキストではなく、time 選択方式に変更しました。それに伴い UI が figma のものとはずれています。
